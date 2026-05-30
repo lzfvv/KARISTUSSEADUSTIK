@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RP Politseisüsteem V5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #050d1a;
+  --surface: #091428;
+  --surface2: #0c1a30;
+  --card: #0f2040;
+  --card-hover: #132748;
+  --border: #1a3058;
+  --border-bright: #254878;
+  --text: #ccdff5;
+  --muted: #5a7a9e;
+  --accent: #2d8cf0;
+  --accent2: #1a6dcf;
+  --accent-glow: rgba(45,140,240,0.15);
+  --accent-glow2: rgba(45,140,240,0.30);
+  --green: #0fba7e;
+  --green-bg: rgba(15,186,126,0.10);
+  --red: #f23d5a;
+  --red-bg: rgba(242,61,90,0.10);
+  --amber: #f0a030;
+  --amber-bg: rgba(240,160,48,0.10);
+  --purple: #9060f5;
+  --purple-bg: rgba(144,96,245,0.10);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+/* ══════════════════════════════
+   LOGIN
+══════════════════════════════ */
+.login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.4s ease;
+}
+.login-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(45,140,240,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.login-box {
+  width: 380px; padding: 44px 36px 36px;
+  background: var(--surface); border: 1px solid var(--border-bright);
+  border-radius: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.login-logo {
+  text-align: center; margin-bottom: 32px;
+}
+.login-logo img {
+  width: 100px; height: 100px; object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(45,140,240,0.5)) drop-shadow(0 0 8px rgba(45,140,240,0.3));
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.login-logo h2 {
+  font-size: 1.25rem; font-weight: 700; color: var(--text);
+  letter-spacing: 0.04em; margin-top: 14px;
+}
+.login-logo p {
+  font-size: 0.68rem; color: var(--muted); font-family: var(--mono);
+  margin-top: 5px; letter-spacing: 0.12em;
+}
+.divider {
+  height: 1px; background: var(--border); margin: 20px 0;
+}
+.form-group { margin-bottom: 13px; }
+.form-group label {
+  display: block; font-size: 0.68rem; color: var(--muted);
+  font-family: var(--mono); letter-spacing: 0.09em; margin-bottom: 6px;
+}
+.form-group input {
+  width: 100%; padding: 11px 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 0.88rem;
+  font-family: var(--sans); transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.form-group input::placeholder { color: var(--muted); opacity: 0.6; }
+.login-btn {
+  width: 100%; padding: 12px; margin-top: 8px;
+  border: none; border-radius: 11px; cursor: pointer;
+  font-family: var(--sans); font-weight: 600; font-size: 0.9rem;
+  transition: all 0.2s; letter-spacing: 0.02em;
+}
+.login-btn.primary {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 4px 20px rgba(45,140,240,0.3);
+}
+.login-btn.primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(45,140,240,0.4); }
+.login-btn.primary:active { transform: translateY(0); }
+.login-btn.ghost {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); margin-top: 8px;
+}
+.login-btn.ghost:hover { border-color: var(--border-bright); color: var(--text); }
+
+/* ══════════════════════════════
+   HERO BANNER (logo top of main)
+══════════════════════════════ */
+.hero-banner {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 24px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.hero-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 100% at 50% 0%, rgba(45,140,240,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-logo-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.hero-logo-wrap::before {
+  content: '';
+  position: absolute;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(45,140,240,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.hero-logo-wrap img {
+  width: 72px; height: 72px; object-fit: contain; position: relative; z-index: 1;
+  filter: drop-shadow(0 0 16px rgba(45,140,240,0.5));
+  animation: float 4s ease-in-out infinite;
+}
+.hero-title {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text); text-align: center;
+}
+.hero-sub {
+  font-size: 0.65rem; font-family: var(--mono); color: var(--muted);
+  letter-spacing: 0.14em; text-align: center;
+}
+.hero-meta {
+  font-size: 0.72rem; font-family: var(--mono); color: var(--muted);
+  text-align: center;
+}
+.hero-meta span { color: var(--accent); }
+
+/* ══════════════════════════════
+   STICKY SEARCH BAR
+══════════════════════════════ */
+.search-bar {
+  padding: 12px 24px 10px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(8px);
+}
+.search-wrap { max-width: 720px; margin: 0 auto; position: relative; }
+.search-wrap input {
+  width: 100%; padding: 10px 14px 10px 40px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 0.88rem;
+  font-family: var(--sans); transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrap input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.search-wrap input::placeholder { color: var(--muted); opacity: 0.6; }
+.search-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  font-size: 15px; color: var(--muted); pointer-events: none;
+}
+.category-filters {
+  display: flex; gap: 5px; flex-wrap: wrap;
+  max-width: 720px; margin: 9px auto 0;
+}
+.cat-btn {
+  padding: 4px 11px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-size: 0.68rem; cursor: pointer;
+  font-family: var(--mono); letter-spacing: 0.04em;
+  transition: all 0.15s; white-space: nowrap;
+}
+.cat-btn:hover { border-color: var(--border-bright); color: var(--text); }
+.cat-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ══════════════════════════════
+   LAYOUT
+══════════════════════════════ */
+.main { display: grid; grid-template-columns: 1fr 310px; }
+.catalog { padding: 20px 22px 40px; min-height: calc(100vh - 220px); }
+.sidebar {
+  background: var(--surface); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: calc(100vh - 220px); position: sticky; top: 0;
+}
+
+/* ══════════════════════════════
+   CATALOG CARDS
+══════════════════════════════ */
+.category-section { margin-bottom: 26px; animation: fadeInUp 0.4s ease both; }
+.category-title {
+  font-size: 0.68rem; font-family: var(--mono); letter-spacing: 0.12em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.category-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 9px; }
+.law-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 13px; padding: 13px;
+  display: flex; flex-direction: column; gap: 7px;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  animation: fadeInUp 0.35s ease both;
+}
+.law-card:hover {
+  border-color: var(--border-bright); background: var(--card-hover);
+  transform: translateY(-2px);
+}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.para-code {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--accent);
+  background: var(--accent-glow); padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+  border: 1px solid rgba(45,140,240,0.2);
+}
+.badges { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
+.badge {
+  font-size: 0.6rem; font-family: var(--mono); letter-spacing: 0.05em;
+  padding: 2px 6px; border-radius: 4px; font-weight: 600;
+}
+.badge-trahv    { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(15,186,126,0.22); }
+.badge-vangistus{ background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(242,61,90,0.22); }
+.badge-arest    { background: var(--amber-bg);  color: var(--amber);  border: 1px solid rgba(240,160,48,0.22); }
+.badge-litsents { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(144,96,245,0.22); }
+.badge-hoiatus  { background: rgba(90,122,158,0.12); color: var(--muted); border: 1px solid rgba(90,122,158,0.2); }
+
+.card-title { font-size: 0.86rem; font-weight: 600; line-height: 1.35; color: var(--text); }
+.card-penalty { font-size: 0.76rem; color: var(--muted); font-family: var(--mono); line-height: 1.4; }
+.btn-add {
+  width: 100%; padding: 7px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; cursor: pointer; font-size: 0.78rem;
+  font-family: var(--sans); font-weight: 600; margin-top: 2px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-add:hover { background: var(--accent2); }
+.btn-add:active { transform: scale(0.97); }
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sb-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.sb-header h3 { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+.sb-count {
+  background: var(--accent); color: #fff; font-size: 0.68rem;
+  font-family: var(--mono); padding: 2px 8px; border-radius: 10px;
+  transition: transform 0.2s;
+}
+.sb-count.bump { animation: bump 0.25s ease; }
+
+.sb-info {
+  padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.sb-label { font-size: 0.62rem; font-family: var(--mono); color: var(--muted); letter-spacing: 0.08em; margin-bottom: 2px; }
+.sb-value { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+
+.sb-list { flex: 1; overflow-y: auto; }
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+  animation: slideInRight 0.2s ease;
+}
+.sb-item:hover { background: var(--card-hover); }
+.sb-code {
+  font-family: var(--mono); font-size: 0.64rem; color: var(--accent);
+  background: var(--accent-glow); padding: 2px 6px; border-radius: 4px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.sb-name { font-size: 0.78rem; color: var(--text); flex: 1; line-height: 1.3; }
+.sb-fine { font-family: var(--mono); font-size: 0.74rem; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+.btn-rm {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 13px; padding: 3px 4px; border-radius: 4px; line-height: 1;
+  transition: color 0.15s, background 0.15s; flex-shrink: 0;
+}
+.btn-rm:hover { color: var(--red); background: var(--red-bg); }
+
+.empty-state {
+  padding: 36px 16px; text-align: center; color: var(--muted);
+  font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.empty-icon { font-size: 28px; opacity: 0.35; }
+
+/* ── TOTALS ── */
+.sb-totals { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.t-label { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); letter-spacing: 0.06em; }
+.t-val { font-size: 0.88rem; font-weight: 700; font-family: var(--mono); }
+.t-val.money { color: var(--green); }
+.t-val.count { color: var(--accent); }
+.jail-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.jail-badge {
+  font-size: 0.64rem; font-family: var(--mono); padding: 3px 9px; border-radius: 5px;
+  font-weight: 600; letter-spacing: 0.04em;
+}
+.jail-badge.vang { background: var(--red-bg); color: var(--red); border: 1px solid rgba(242,61,90,0.25); }
+.jail-badge.ar   { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(240,160,48,0.25); }
+
+.action-row { display: flex; gap: 7px; margin-top: 10px; }
+.btn-act {
+  flex: 1; padding: 9px; border-radius: 9px; cursor: pointer;
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 600;
+  transition: all 0.15s;
+}
+.btn-raport {
+  background: var(--accent); color: #fff; border: none;
+  box-shadow: 0 3px 12px rgba(45,140,240,0.25);
+}
+.btn-raport:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-clear {
+  background: transparent; color: var(--muted); border: 1px solid var(--border);
+}
+.btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+/* ══════════════════════════════
+   NO RESULTS
+══════════════════════════════ */
+.no-results {
+  text-align: center; padding: 60px 20px; color: var(--muted);
+  font-size: 0.82rem; font-family: var(--mono);
+}
+
+/* ══════════════════════════════
+   TOAST
+══════════════════════════════ */
+.toast {
+  position: fixed; bottom: 22px; right: 22px; z-index: 9999;
+  background: var(--surface2); border: 1px solid var(--green);
+  color: var(--green); padding: 9px 16px; border-radius: 10px;
+  font-size: 0.78rem; font-family: var(--mono);
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.25s; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════
+   KEYFRAMES
+══════════════════════════════ */
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp   { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes bump      { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+@keyframes float     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes pulse-glow {
+  0%,100% { opacity: 1; filter: drop-shadow(0 0 16px rgba(45,140,240,0.5)); }
+  50%      { opacity: 0.85; filter: drop-shadow(0 0 28px rgba(45,140,240,0.75)); }
+}
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 780px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    height: auto; max-height: 50vh; border-left: none;
+    border-top: 1px solid var(--border-bright);
+  }
+  .catalog { padding-bottom: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="pic.png" alt="Politsei logo" />
+      <h2>RP Politseisüsteem</h2>
+      <p>KARISTUSSEADUSTIK V5</p>
+    </div>
+    <div class="divider"></div>
+    <div class="form-group">
+      <label>AMETNIK — SINU NIMI</label>
+      <input id="amtnikInput" placeholder="nt. Jüri Mets" />
+    </div>
+    <div class="form-group">
+      <label>KAHTLUSTATAV / SIHTMÄRK</label>
+      <input id="sihtmarkInput" placeholder="nt. Markus Tamm" />
+    </div>
+    <button class="login-btn primary" onclick="enter()">Sisene süsteemi</button>
+    <button class="login-btn ghost" onclick="skip()">Jätka anonüümselt</button>
+  </div>
+</div>
+
+<!-- ═══ HERO BANNER ═══ -->
+<div class="hero-banner" id="heroBanner" style="display:none">
+  <div class="hero-logo-wrap">
+    <img src="pic.png" alt="Politsei logo" />
+  </div>
+  <div class="hero-title">RP KARISTUSSEADUSTIK</div>
+  <div class="hero-sub">POLITSEISÜSTEEM V5 · ROLEPLAY</div>
+  <div class="hero-meta" id="heroMeta"></div>
+</div>
+
+<!-- ═══ SEARCH BAR ═══ -->
+<div class="search-bar" id="searchBar" style="display:none">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="searchInput" placeholder="Otsi paragrahvi nime, koodi või summa järgi..." oninput="render()" />
+  </div>
+  <div class="category-filters" id="catFilters"></div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="mainLayout" style="display:none">
+
+  <!-- CATALOG -->
+  <div class="catalog" id="catalog"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <h3>📋 Valitud rikkumised</h3>
+      <span class="sb-count" id="sbCount">0</span>
+    </div>
+    <div class="sb-info">
+      <div class="sb-label">KAHTLUSTATAV</div>
+      <div class="sb-value" id="sbTarget">—</div>
+      <div style="margin-top:8px">
+        <div class="sb-label">AMETNIK</div>
+        <div class="sb-value" id="sbOfficer">—</div>
+      </div>
+    </div>
+    <div class="sb-list" id="sbList">
+      <div class="empty-state">
+        <div class="empty-icon">📂</div>
+        <div>Ükski rikkumine pole valitud</div>
+      </div>
+    </div>
+    <div class="sb-totals">
+      <div class="total-row">
+        <span class="t-label">PARAGRAHVE</span>
+        <span class="t-val count" id="tCount">0</span>
+      </div>
+      <div class="total-row">
+        <span class="t-label">KOGUTRAHV</span>
+        <span class="t-val money" id="tMoney">0€</span>
+      </div>
+      <div id="jailBadgesWrap" style="display:none">
+        <div class="t-label" style="margin-bottom:5px">KARISTUS</div>
+        <div class="jail-badges" id="jailBadges"></div>
+      </div>
+      <div class="action-row">
+        <button class="btn-act btn-raport" onclick="copyRaport()">📄 Kopeeri raport</button>
+        <button class="btn-act btn-clear" onclick="clearAll()">✕ Tühjenda</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const seadustik = [
+  {
+    id:"liiklus", nimi:"🚔 Liiklusrikkumised",
+    paragrahvid:[
+      {kood:"§1",  nimi:"Kiiruse ületamine (kuni 20 km/h)",       trahv:200,  vangla:0,   arest:0},
+      {kood:"§2",  nimi:"Kiiruse ületamine (üle 20 km/h)",         trahv:500,  vangla:0,   arest:0},
+      {kood:"§3",  nimi:"Kiiruse ületamine (üle 40 km/h)",         trahv:1000, vangla:0,   arest:15},
+      {kood:"§4",  nimi:"Punase fooritule eiramine",                trahv:400,  vangla:0,   arest:0},
+      {kood:"§5",  nimi:"Ohtlik sõidustiil",                        trahv:700,  vangla:0,   arest:10},
+      {kood:"§6",  nimi:"Politsei peatumismärguande eiramine",      trahv:1500, vangla:20,  arest:0},
+      {kood:"§7",  nimi:"Ilma juhiloata sõitmine",                  trahv:2000, vangla:0,   arest:0,  litsents:true},
+      {kood:"§8",  nimi:"Joobes juhtimine",                         trahv:3000, vangla:30,  arest:0},
+      {kood:"§9",  nimi:"Sõiduki hülgamine",                        trahv:300,  vangla:0,   arest:0},
+      {kood:"§10", nimi:"Avarii sündmuskohalt lahkumine",           trahv:1200, vangla:15,  arest:0},
+      {kood:"§11", nimi:"Mobiili kasutamine roolis",                trahv:350,  vangla:0,   arest:0},
+      {kood:"§12", nimi:"Kellegi üle sõitmine (ettevaatamatusest)", trahv:2500, vangla:40,  arest:0},
+    ]
+  },
+  {
+    id:"isikuvastane", nimi:"👊 Isikuvastased kuriteod",
+    paragrahvid:[
+      {kood:"§20", nimi:"Kehaline väärkohtlemine",       trahv:1500, vangla:20,  arest:0},
+      {kood:"§21", nimi:"Raske kehaline väärkohtlemine", trahv:0,    vangla:60,  arest:0},
+      {kood:"§22", nimi:"Röövimiskatse",                  trahv:0,    vangla:45,  arest:0},
+      {kood:"§23", nimi:"Röövimine",                      trahv:0,    vangla:90,  arest:0},
+      {kood:"§24", nimi:"Tapmine (katse)",                trahv:0,    vangla:120, arest:0},
+      {kood:"§25", nimi:"Tapmine",                        trahv:0,    vangla:240, arest:0},
+      {kood:"§26", nimi:"Ähvardamine",                    trahv:800,  vangla:10,  arest:0},
+      {kood:"§27", nimi:"Inimrööv",                       trahv:0,    vangla:150, arest:0},
+      {kood:"§28", nimi:"Vägivald ametniku suhtes",       trahv:2000, vangla:50,  arest:0},
+    ]
+  },
+  {
+    id:"vara", nimi:"💼 Varavastased kuriteod",
+    paragrahvid:[
+      {kood:"§40", nimi:"Vargus",                                   trahv:500,  vangla:20, arest:0},
+      {kood:"§41", nimi:"Suuremahuline vargus",                     trahv:0,    vangla:50, arest:0},
+      {kood:"§42", nimi:"Vara kahjustamine",                        trahv:800,  vangla:0,  arest:0},
+      {kood:"§43", nimi:"Sõiduki vargus",                           trahv:1000, vangla:35, arest:0},
+      {kood:"§44", nimi:"Pettus",                                   trahv:1500, vangla:25, arest:0},
+      {kood:"§45", nimi:"Omastamine",                               trahv:1200, vangla:15, arest:0},
+      {kood:"§46", nimi:"Kelmuse teel ebaseaduslik rikastumine",    trahv:3000, vangla:40, arest:0},
+      {kood:"§47", nimi:"Pangakaardi väärkasutamine",               trahv:600,  vangla:10, arest:0},
+    ]
+  },
+  {
+    id:"relv", nimi:"🔫 Relva- ja ohtlikud rikkumised",
+    paragrahvid:[
+      {kood:"§60", nimi:"Loata relva omamine",                  trahv:2000, vangla:30,  arest:0, litsents:true},
+      {kood:"§61", nimi:"Loata tulistamine avalikus kohas",     trahv:3000, vangla:60,  arest:0},
+      {kood:"§62", nimi:"Relva kasutamine kuriteos",            trahv:0,    vangla:90,  arest:0},
+      {kood:"§63", nimi:"Lõhkeaine omamine",                   trahv:0,    vangla:120, arest:0},
+      {kood:"§64", nimi:"Ebaseaduslik relvakaupmine",          trahv:5000, vangla:150, arest:0},
+      {kood:"§65", nimi:"Teise isiku ohustamine relvaga",      trahv:1500, vangla:30,  arest:0},
+    ]
+  },
+  {
+    id:"narkootikumid", nimi:"💊 Narkootikumid",
+    paragrahvid:[
+      {kood:"§80", nimi:"Narkootikumide tarbimine",                        trahv:1000, vangla:0,   arest:20},
+      {kood:"§81", nimi:"Narkootikumide omamine (väike kogus)",            trahv:1500, vangla:20,  arest:0},
+      {kood:"§82", nimi:"Narkootikumide omamine (suur kogus)",             trahv:0,    vangla:60,  arest:0},
+      {kood:"§83", nimi:"Narkootikumide müük",                             trahv:0,    vangla:90,  arest:0},
+      {kood:"§84", nimi:"Narkootikumide müük alaealisele",                 trahv:0,    vangla:180, arest:0},
+      {kood:"§85", nimi:"Narkootikumide tootmine",                         trahv:5000, vangla:120, arest:0},
+    ]
+  },
+  {
+    id:"avalik", nimi:"📢 Avaliku korra rikkumised",
+    paragrahvid:[
+      {kood:"§100", nimi:"Avaliku korra häirimine",          trahv:300,  vangla:0,  arest:5},
+      {kood:"§101", nimi:"Purjuspäi avalikus kohas",         trahv:200,  vangla:0,  arest:0},
+      {kood:"§102", nimi:"Vandaliseerimine",                 trahv:800,  vangla:0,  arest:10},
+      {kood:"§103", nimi:"Loata meeleavaldus",               trahv:500,  vangla:0,  arest:0},
+      {kood:"§104", nimi:"Tuletõrje eeskirja rikkumine",    trahv:400,  vangla:0,  arest:0},
+      {kood:"§105", nimi:"Põgenemine politseinikult",        trahv:1000, vangla:15, arest:0},
+      {kood:"§106", nimi:"Valeväljakutse politseile",        trahv:700,  vangla:0,  arest:0},
+      {kood:"§107", nimi:"Avalik prügimine",                 trahv:150,  vangla:0,  arest:0},
+    ]
+  },
+  {
+    id:"ametnik", nimi:"⚖️ Ametnikuvastased kuriteod",
+    paragrahvid:[
+      {kood:"§120", nimi:"Ametnikule vastuhakkamine",           trahv:2000, vangla:30, arest:0},
+      {kood:"§121", nimi:"Ametniku laimamine",                  trahv:800,  vangla:0,  arest:0},
+      {kood:"§122", nimi:"Altkäemaksu andmine",                 trahv:5000, vangla:60, arest:0},
+      {kood:"§123", nimi:"Altkäemaksu võtmine (ametnik)",       trahv:0,    vangla:90, arest:0},
+      {kood:"§124", nimi:"Valeütluste andmine",                 trahv:1000, vangla:20, arest:0},
+      {kood:"§125", nimi:"Ametliku dokumendi võltsimine",       trahv:2500, vangla:40, arest:0},
+    ]
+  },
+];
+
+let valitud = [];
+let amtnik  = "";
+let sihtmark = "";
+
+/* ── LOGIN ── */
+function enter() {
+  amtnik   = document.getElementById("amtnikInput").value.trim()   || "Anonüümne ametnik";
+  sihtmark = document.getElementById("sihtmarkInput").value.trim() || "Tundmatu isik";
+  openApp();
+}
+function skip() {
+  amtnik   = "Anonüümne ametnik";
+  sihtmark = "Tundmatu isik";
+  openApp();
+}
+function openApp() {
+  document.getElementById("loginOverlay").style.display = "none";
+  document.getElementById("heroBanner").style.display   = "flex";
+  document.getElementById("searchBar").style.display    = "block";
+  document.getElementById("mainLayout").style.display   = "grid";
+
+  document.getElementById("heroMeta").innerHTML =
+    `👮 <span>${amtnik}</span> &nbsp;·&nbsp; 🎯 <span>${sihtmark}</span>`;
+  document.getElementById("sbTarget").textContent  = sihtmark;
+  document.getElementById("sbOfficer").textContent = amtnik;
+
+  renderFilters();
+  render();
+}
+
+/* ── CATEGORY FILTER BUTTONS ── */
+function renderFilters() {
+  const cont = document.getElementById("catFilters");
+  cont.innerHTML = "";
+  const makeBtn = (label, id) => {
+    const b = document.createElement("button");
+    b.className = "cat-btn" + (id === "kõik" ? " active" : "");
+    b.dataset.cat = id;
+    b.textContent = label;
+    b.onclick = () => setFilter(id);
+    cont.appendChild(b);
+  };
+  makeBtn("Kõik", "kõik");
+  seadustik.forEach(c => makeBtn(c.nimi.replace(/^\S+ /, ""), c.id));
+}
+
+let activeFilter = "kõik";
+function setFilter(id) {
+  activeFilter = id;
+  document.querySelectorAll(".cat-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.cat === id));
+  render();
+}
+
+/* ── BADGE HELPERS ── */
+function getBadges(p) {
+  let h = "";
+  if (p.trahv  > 0) h += `<span class="badge badge-trahv">TRAHV</span>`;
+  if (p.vangla > 0) h += `<span class="badge badge-vangistus">VANGISTUS</span>`;
+  if (p.arest  > 0) h += `<span class="badge badge-arest">AREST</span>`;
+  if (p.litsents)   h += `<span class="badge badge-litsents">LITSENTS</span>`;
+  return h || `<span class="badge badge-hoiatus">HOIATUS</span>`;
+}
+
+function penaltyLine(p) {
+  let parts = [];
+  if (p.trahv  > 0) parts.push(`${p.trahv.toLocaleString("et")}€ trahv`);
+  if (p.vangla > 0) parts.push(`${p.vangla} min vangistust`);
+  if (p.arest  > 0) parts.push(`${p.arest} min arest`);
+  if (p.litsents)   parts.push("litsents tühistatakse");
+  return parts.join(" + ") || "Hoiatus";
+}
+
+/* ── RENDER CATALOG ── */
+function render() {
+  const q = (document.getElementById("searchInput")?.value || "").toLowerCase();
+  const cat = document.getElementById("catalog");
+  cat.innerHTML = "";
+  let found = false;
+
+  seadustik.forEach((c, ci) => {
+    if (activeFilter !== "kõik" && activeFilter !== c.id) return;
+    const items = c.paragrahvid.filter(p =>
+      p.kood.toLowerCase().includes(q) ||
+      p.nimi.toLowerCase().includes(q)  ||
+      String(p.trahv).includes(q)
+    );
+    if (!items.length) return;
+    found = true;
+
+    const sec = document.createElement("div");
+    sec.className = "category-section";
+    sec.style.animationDelay = (ci * 0.05) + "s";
+    sec.innerHTML = `<div class="category-title">${c.nimi}</div><div class="grid"></div>`;
+    const grid = sec.querySelector(".grid");
+
+    items.forEach((p, pi) => {
+      const card = document.createElement("div");
+      card.className = "law-card";
+      card.style.animationDelay = (ci * 0.05 + pi * 0.03) + "s";
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="para-code">${p.kood}</span>
+          <div class="badges">${getBadges(p)}</div>
+        </div>
+        <div class="card-title">${p.nimi}</div>
+        <div class="card-penalty">${penaltyLine(p)}</div>
+        <button class="btn-add" onclick='addItem(${JSON.stringify(p)})'>+ Lisa rikkumine</button>
+      `;
+      grid.appendChild(card);
+    });
+    cat.appendChild(sec);
+  });
+
+  if (!found) {
+    cat.innerHTML = `<div class="no-results">Otsingule "${q}" ei leitud ühtegi paragrahvi.</div>`;
+  }
+}
+
+/* ── ADD / REMOVE ── */
+function addItem(p) {
+  valitud.push(p);
+  updateSidebar();
+  bumpCount();
+  showToast(`✓ ${p.kood} lisatud`);
+}
+function removeItem(idx) {
+  valitud.splice(idx, 1);
+  updateSidebar();
+}
+function clearAll() {
+  valitud = [];
+  updateSidebar();
+}
+
+function bumpCount() {
+  const el = document.getElementById("sbCount");
+  el.classList.remove("bump");
+  void el.offsetWidth;
+  el.classList.add("bump");
+}
+
+/* ── SIDEBAR UPDATE ── */
+function updateSidebar() {
+  const list  = document.getElementById("sbList");
+  const count = document.getElementById("sbCount");
+  const tCount = document.getElementById("tCount");
+  const tMoney = document.getElementById("tMoney");
+  const jWrap  = document.getElementById("jailBadgesWrap");
+  const jBadges= document.getElementById("jailBadges");
+
+  count.textContent  = valitud.length;
+  tCount.textContent = valitud.length;
+
+  let money = 0, hasJail = false, hasArest = false;
+  valitud.forEach(p => {
+    money += p.trahv  || 0;
+    if (p.vangla > 0) hasJail  = true;
+    if (p.arest  > 0) hasArest = true;
+  });
+
+  tMoney.textContent = money.toLocaleString("et") + "€";
+
+  // Jail badges — just labels, no time
+  if (hasJail || hasArest) {
+    jBadges.innerHTML = "";
+    if (hasJail)  jBadges.innerHTML += `<span class="jail-badge vang">VANGISTUS</span>`;
+    if (hasArest) jBadges.innerHTML += `<span class="jail-badge ar">AREST</span>`;
+    jWrap.style.display = "block";
+  } else {
+    jWrap.style.display = "none";
+  }
+
+  if (!valitud.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div><div>Ükski rikkumine pole valitud</div></div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  valitud.forEach((p, idx) => {
+    const div = document.createElement("div");
+    div.className = "sb-item";
+    div.innerHTML = `
+      <span class="sb-code">${p.kood}</span>
+      <span class="sb-name">${p.nimi}</span>
+      <span class="sb-fine">${p.trahv > 0 ? p.trahv.toLocaleString("et") + "€" : ""}</span>
+      <button class="btn-rm" onclick="removeItem(${idx})" title="Eemalda">✕</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ── COPY REPORT ── */
+function copyRaport() {
+  if (!valitud.length) { showToast("❌ Ükski rikkumine pole valitud"); return; }
+
+  const kuupäev = new Date().toLocaleString("et-EE", {
+    day:"2-digit", month:"2-digit", year:"2-digit",
+    hour:"2-digit", minute:"2-digit"
+  });
+
+  let money = 0;
+  valitud.forEach(p => { money += p.trahv || 0; });
+
+  let text = "";
+  text += `Kuupäev:       ${kuupäev}\n`;
+  text += `Ametnik:       ${amtnik}\n`;
+  text += `Kahtlustatav: ${sihtmark}\n`;
+  text += `RIKKUMISED (${valitud.length} tk):\n`;
+  valitud.forEach((p, i) => {
+    text += `  ${i + 1}. ${p.kood} — ${p.nimi}\n`;
+    text += `     ${penaltyLine(p)}\n`;
+  });
+  text += `Trahv: ${money.toLocaleString("et")}€\n`;
+
+  navigator.clipboard.writeText(text).then(() =>
+    showToast("✓ Raport kopeeritud lõikelauale!"));
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+/* ── ENTER KEY on login ── */
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" &&
+      document.getElementById("loginOverlay").style.display !== "none") enter();
+});
+</script>
+</body>
+</html>
